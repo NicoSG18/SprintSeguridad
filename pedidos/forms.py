@@ -1,12 +1,14 @@
 from django import forms
-from .models import Variable
+from .models import Pedido
 
-class VariableForm(forms.ModelForm):
+class PedidoForm(forms.ModelForm):
     class Meta:
-        model = Variable
+        model = Pedido
         fields = [
-            'name',
+            'descripcion',
+            'estado',
         ]
         labels = {
-            'name': 'Name',
+            'descripcion': 'Descripción del Pedido',
+            'estado': 'Estado Inicial',
         }

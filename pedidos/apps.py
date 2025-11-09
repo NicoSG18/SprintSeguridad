@@ -1,5 +1,4 @@
 from django.apps import AppConfig
 
-
-class VariablesConfig(AppConfig):
-    name = 'variables'
+class PedidosConfig(AppConfig):
+    name = 'pedidos'

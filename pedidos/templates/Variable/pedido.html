@@ -2,24 +2,25 @@
 {% block content %}
 
 <div class="content">
-
     <div class="page-content-wrapper">
         <div class="container">
-            <!-- Content page -->
-
             <div class="panel panel-default">
                 <div class="panel-body">
 
                     <table class="table table-hover">
                         <thead>
-                        <tr style="color:#0E2EB0">
-                            <th>Variable</th>
+                        <tr style="color:#0eb067">
+                            <th>Pedido Detalle</th>
+                            <th>Asignado a</th>
+                            <th>Estado</th>
                         </tr>
                         </thead>
                         <tbody>
 
                         <tr>
-                            <td>{{ variable.name }}</td>
+                            <td>{{ pedido.descripcion }}</td>
+                            <td>{{ pedido.operario_asignado|default:"Sin Asignar" }}</td>
+                            <td>{{ pedido.estado }}</td>
                         </tr>
 
                         </tbody>
@@ -27,8 +28,8 @@
 
                     <div style="text-align:center;">
                         <button type="button" class="btn btn-primary waves-effect waves-light"
-                                onClick=" window.location.href='/variables' ">
-                            Back
+                                onClick=" window.location.href='/pedidos' ">
+                            Volver a Pedidos
                         </button>
                     </div>
 

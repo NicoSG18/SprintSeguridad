@@ -4,10 +4,10 @@
 <div class="content">
     <div class="">
         <div class="page-header-title">
-            <h4 class="page-title">Variables</h4>
+            <h4 class="page-title">Gestión y Asignación de Pedidos</h4>
             <div style="text-align:right;">
                 <button type="button" class="btn btn-success waves-effect waves-light"
-                        onClick=" window.location.href='/variablecreate' " style="text-align:center;">+
+                        onClick=" window.location.href='/pedidos/crear/' " style="text-align:center;">+ Crear Pedido
                 </button>
             </div>
         </div>
@@ -17,28 +17,33 @@
 
     <div class="page-content-wrapper">
         <div class="container">
-            <!-- Content page -->
-
             <div class="panel panel-default">
                 <div class="panel-body">
 
                     <table class="table table-hover">
                         <thead>
-                        <tr style="color:#0E2EB0">
-                            <th>Variable</th>
+                        <tr style="color:#0eb075">
+                            <th>Descripción del Pedido</th>
+                            <th>Estado</th>
+                            <th>Asignado a</th>
+                            <th>Acción</th> 
                         </tr>
                         </thead>
                         <tbody>
 
-                        {% for variable in variable_list %}
+                        {% for pedido in pedido_list %}
                         <tr>
-                            <td class="d-flex justify-content-between">
-                                {{ variable.name }}
-                                <button type="button" class="btn btn-primary waves-effect waves-light"
-                                        onClick=" window.location.href='/variable/{{ variable.id }}' ">
-                                    Detail
-                                </button>
+                            <td>{{ pedido.descripcion }}</td>
+                            <td>{{ pedido.estado }}</td>
+                            <td>
+                                {{ pedido.operario_asignado|default:"PENDIENTE" }}
                             </td>
+                            <td class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-primary waves-effect waves-light"
+                                        onClick=" window.location.href='/pedidos/{{ pedido.id }}/' ">
+                                    Detalle
+                                </button>
+                                </td>
                         </tr>
                         {% endfor %}
 
@@ -48,7 +53,7 @@
                     <div style="text-align:center;">
                         <button type="button" class="btn btn-primary waves-effect waves-light"
                                 onClick=" window.location.href='/' ">
-                            Back
+                            Volver al Inicio
                         </button>
                     </div>
 

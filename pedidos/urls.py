@@ -1,10 +1,14 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-
 from . import views
 
 urlpatterns = [
-    path('variables/', views.variable_list, name='variableList'),
-    path('variable/<id>', views.single_variable, name='singleVariable'),
-    path('variablecreate/', csrf_exempt(views.variable_create), name='variableCreate'),
+    # Lista de Pedidos (Protegida)
+    path('', views.pedido_list, name='pedido_list'), 
+    
+    # Detalle de Pedido
+    path('<int:id>/', views.single_pedido, name='single_pedido'), 
+    
+    # Crear Pedido (Protegida)
+    path('crear/', csrf_exempt(views.pedido_create), name='pedido_create'), 
 ]
