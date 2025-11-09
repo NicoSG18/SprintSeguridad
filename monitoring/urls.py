@@ -1,11 +1,17 @@
 from django.contrib import admin
 from django.urls import include, path
 from . import views
+from . import auth0backend
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
-    path('', include('measurements.urls')),
-    path('', include('variables.urls')),
+    path('pedidos/', include('pedidos.urls')),       # <-- CAMBIO 3
+    path('operarios/', include('operarios.urls')),   # <-- CAMBIO 4
+
+    # Rutas de autenticación
+    path('', include('social_django.urls')),
+    path('', include('django.contrib.auth.urls')),
+    path('login/auth0', auth0backend.login),
 ]
 
