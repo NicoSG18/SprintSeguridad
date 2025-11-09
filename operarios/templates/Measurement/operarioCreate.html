@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content">
+    <div class="page-header-title">
+        <h4 class="page-title">{{ titulo }}</h4>
+    </div>
+    
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <br>
+                        {{ form.as_p }}
+                        
+                        <button type="submit" class="btn btn-success waves-effect waves-light">Guardar Operario</button>
+                        
+                        <button type="button" class="btn btn-primary waves-effect waves-light"
+                                                    onClick=" window.location.href='/operarios' ">Cancelar y Volver
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

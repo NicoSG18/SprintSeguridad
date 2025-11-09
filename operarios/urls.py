@@ -1,9 +1,12 @@
-from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
+# operarios/urls.py
 
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('measurements/', views.measurement_list, name='measurementList'),
-    path('measurementcreate/', csrf_exempt(views.measurement_create), name='measurementCreate'),
+    # Ruta para crear un nuevo operario
+    path('crear/', views.operario_create, name='operario_create'),
+    
+    # Ruta base para /operarios/ (Lista de Operarios)
+    path('', views.operario_list, name='operario_list'),
 ]

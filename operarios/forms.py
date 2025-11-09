@@ -1,21 +1,19 @@
+# operarios/forms.py
+
 from django import forms
-from .models import Measurement
+from .models import Operario
 
-class MeasurementForm(forms.ModelForm):
+class OperarioForm(forms.ModelForm):
+
     class Meta:
-        model = Measurement
+        model = Operario
         fields = [
-            'variable',
-            'value',
-            'unit',
-            'place',
-            #'dateTime',
+            'nombre',
+            'identificador_interno',
+            'disponible',
         ]
-
         labels = {
-            'variable' : 'Variable',
-            'value' : 'Value',
-            'unit' : 'Unit',
-            'place' : 'Place',
-            #'dateTime' : 'Date Time',
+            'nombre': 'Nombre Completo',
+            'identificador_interno': 'ID de Empleado',
+            'disponible': '¿Está Disponible para Asignación?',
         }

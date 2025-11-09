@@ -1,33 +1,43 @@
-from django.shortcuts import render
-from .forms import MeasurementForm
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from .logic.logic_measurement import create_measurement, get_measurements
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
+from operarios.forms import OperarioForm
+from .models import Operario 
+from .decorators import allowed_users
+
+# VISTA: Lista de Operarios
 @login_required
-def measurement_list(request):
-    measurements = get_measurements()
+def operario_list(request):
+    """ Muestra la lista de operarios activos. Accesible por cualquier usuario autenticado. """
+    # Lógica de negocio segura (usando ORM)
+    operarios = Operario.objects.all().order_by('disponible', 'nombre')
+
     context = {
-        'measurement_list': measurements
+        'operario_list': operarios,
+        'titulo': "Personal Activo de Bodega"
     }
-    return render(request, 'Measurement/measurements.html', context)
+    
+    return render(request, 'Operario/operarios.html', context)
 
-def measurement_create(request):
+# NUEVA VISTA: Crear Operario (Solo para Jefe de Bodega)
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['jefe_bodega']) # <-- SOLO Jefe de Bodega
+def operario_create(request):
+    """ Permite al Jefe de Bodega crear un nuevo Operario. """
+    
+    form = OperarioForm()
+
     if request.method == 'POST':
-        form = MeasurementForm(request.POST)
+        form = OperarioForm(request.POST)
         if form.is_valid():
-            create_measurement(form)
-            messages.add_message(request, messages.SUCCESS, 'Measurement create successful')
-            return HttpResponseRedirect(reverse('measurementList'))
-        else:
-            print(form.errors)
-    else:
-        form = MeasurementForm()
-
+            form.save()
+            # Redirige a la lista de operarios después de la creación exitosa
+            return redirect('operario_list') 
+    
     context = {
         'form': form,
+        'titulo': "Crear Nuevo Operario"
     }
-
-    return render(request, 'Measurement/measurementCreate.html', context)
+    
+    # Renderiza la nueva plantilla 'Operario/operarioCreate.html'
+    return render(request, 'Operario/operarioCreate.html', context)
