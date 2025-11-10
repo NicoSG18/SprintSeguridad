@@ -134,3 +134,34 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'static', 'media')
 STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'static'),
 )
+
+# monitoring/settings.py (Al final del archivo)
+
+# --- RUTAS DE AUTENTICACIÓN ---
+LOGIN_URL = "/login/auth0"
+LOGIN_REDIRECT_URL = "/"
+# ⚠️ IMPORTANTE: Usamos localhost para pruebas locales. 
+# Asegúrate de cambiar esto a la IP pública cuando despliegues en AWS.
+LOGOUT_REDIRECT_URL = "https://dev-wd5yikr0h44ic7hv.us.auth0.com/v2/logout?returnTo=http%3A%2F%2Flocalhost:8080" 
+
+# --- CREDENCIALES Y CONFIGURACIÓN DE AUTH0 ---
+SOCIAL_AUTH_TRAILING_SLASH = False 
+SOCIAL_AUTH_AUTH0_DOMAIN = 'dev-wd5yikr0h44ic7hv.us.auth0.com' # Ej: dev-xxxxxx.us.auth0.com
+SOCIAL_AUTH_AUTH0_KEY = 'xabDTb3giiyO8KUm9nvzNPiIpD45d4st' # El Client ID de tu aplicación Auth0
+SOCIAL_AUTH_AUTH0_SECRET = '1i52o7ZBuaW7AOkCgR_cMOtZzQZtp7W3MX8TTZvd3qwk1kHYBEvSgJQMMh4Cof5W' # El Client Secret de tu aplicación Auth0
+
+# Solicitud de SCOPES
+SOCIAL_AUTH_AUTH0_SCOPE = [
+    'openid',
+    'profile',
+    'email',
+    'role', # <-- Clave: Solicita el permiso del rol inyectado por la Action.
+]
+
+# --- BACKENDS DE AUTENTICACIÓN ---
+AUTHENTICATION_BACKENDS = {
+    # El backend que se conecta a Auth0 y usará la clase Auth0 que crearemos.
+    'monitoring.auth0backend.Auth0', 
+    # Backend estándar de Django para usuarios locales (si los hubiera)
+    'django.contrib.auth.backends.ModelBackend',
+}

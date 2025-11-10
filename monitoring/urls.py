@@ -10,8 +10,9 @@ urlpatterns = [
     path('operarios/', include('operarios.urls')),   # <-- CAMBIO 4
 
     # Rutas de autenticación
-    path('', include('social_django.urls')),
-    path('', include('django.contrib.auth.urls')),
-    path('login/auth0', auth0backend.login),
+    path(r'', include('django.contrib.auth.urls')),
+    path(r'', include('social_django.urls')),
+    path('login/auth0', auth0backend.login, name='login'),
 ]
+
 

@@ -71,14 +71,14 @@ def pedido_create(request):
     """ Permite la creación de un nuevo pedido. SOLO para Jefe de Bodega. """
     role = getRole(request)
     
-    # Chequeo de Autorización (RBAC)
     if role == "Jefe de Bodega":
         if request.method == 'POST':
             form = PedidoForm(request.POST)
             if form.is_valid():
                 create_pedido(form)
                 messages.add_message(request, messages.SUCCESS, 'Pedido creado exitosamente')
-                return HttpResponseRedirect(reverse('pedido_create'))
+                # 🔄 CAMBIO: Redirige a la lista de pedidos después de guardar.
+                return HttpResponseRedirect(reverse('pedido_list')) 
             else:
                 print(form.errors)
         else:
@@ -90,5 +90,4 @@ def pedido_create(request):
         return render(request, 'Pedido/pedidoCreate.html', context)
         
     else:
-        # Denegación de Acceso
         return HttpResponse("Unauthorized User: Solo el Jefe de Bodega puede crear pedidos", status=403)
