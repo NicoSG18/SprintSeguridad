@@ -146,7 +146,7 @@ resource "aws_instance" "database" {
               sudo apt-get install -y postgresql postgresql-contrib
 
               sudo -u postgres psql -c "CREATE USER  pedidos_user WITH PASSWORD 'isis2503';"
-              sudo -u postgres createdb -O  pedidos_user monitoring_db
+              sudo -u postgres createdb -O  monitoring_user monitoring_db
               echo "host all all 0.0.0.0/0 trust" | sudo tee -a /etc/postgresql/16/main/pg_hba.conf
               echo "listen_addresses='*'" | sudo tee -a /etc/postgresql/16/main/postgresql.conf
               echo "max_connections=2000" | sudo tee -a /etc/postgresql/16/main/postgresql.conf
