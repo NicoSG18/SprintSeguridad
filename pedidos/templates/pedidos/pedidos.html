@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content">
+    <div class="">
+        <div class="page-header-title">
+            <h4 class="page-title">Gestión y Asignación de Pedidos</h4>
+            <div style="text-align:right;">
+                <button type="button" class="btn btn-success waves-effect waves-light"
+                        onClick=" window.location.href='/pedidos/crear/' " style="text-align:center;">+ Crear Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <table class="table table-hover">
+                        <thead>
+                        <tr style="color:#0eb075">
+                            <th>Descripción del Pedido</th>
+                            <th>Estado</th>
+                            <th>Asignado a</th>
+                            <th>Acción</th> 
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for pedido in pedido_list %}
+                        <tr>
+                            <td>{{ pedido.descripcion }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if pedido.estado == 'PENDIENTE' %}badge-warning
+                                    {% elif pedido.estado == 'ASIGNADO' %}badge-info
+                                    {% else %}badge-success
+                                    {% endif %}">
+                                    {{ pedido.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ pedido.operario_asignado.nombre|default:"PENDIENTE" }}
+                            </td>
+                            
+                            <td>
+                                {% if pedido.estado == 'PENDIENTE' and operarios_disponibles %}
+                                
+                                    <form action="{% url 'pedido_assign' pedido_id=pedido.id %}" method="post">
+                                        {% csrf_token %}
+                                        
+                                        <select name="operario_id" class="form-control form-control-sm mb-1" required>
+                                            <option value="">-- Asignar Operario --</option>
+                                            {% for operario in operarios_disponibles %}
+                                                <option value="{{ operario.id }}">{{ operario.nombre }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <button type="submit" class="btn btn-sm btn-success">Asignar</button>
+                                    </form>
+
+                                {% elif pedido.estado == 'PENDIENTE' and not operarios_disponibles %}
+                                    <span class="text-danger">Sin Operarios Disponibles</span>
+
+                                {% else %}
+                                    <a href="{% url 'single_pedido' id=pedido.id %}" class="btn btn-primary waves-effect waves-light btn-sm">
+                                        Detalle
+                                    </a>
+                                {% endif %}
+                            </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+
+                    <div style="text-align:center;">
+                        <button type="button" class="btn btn-primary waves-effect waves-light"
+                                onClick=" window.location.href='/' ">
+                            Volver al Inicio
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

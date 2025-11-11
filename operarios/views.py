@@ -1,14 +1,22 @@
+from django.contrib import messages  # ⬅️ CORREGIDO: Importación correcta de messages
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
+# Lógica de Seguridad
+from monitoring.auth0backend import getRole
+
+# Modelos y Formularios
 from operarios.forms import OperarioForm
 from .models import Operario 
-from .decorators import allowed_users
+# from .decorators import allowed_users # Se deja comentado si no se usa
 
-# VISTA: Lista de Operarios
+# --- VISTA: Lista de Operarios ---
+
 @login_required
 def operario_list(request):
     """ Muestra la lista de operarios activos. Accesible por cualquier usuario autenticado. """
+    
     # Lógica de negocio segura (usando ORM)
     operarios = Operario.objects.all().order_by('disponible', 'nombre')
 
@@ -17,27 +25,36 @@ def operario_list(request):
         'titulo': "Personal Activo de Bodega"
     }
     
-    return render(request, 'Operario/operarios.html', context)
+    # 🎯 CORREGIDO: Cambiado 'Operario/operarios.html' a 'operarios/operarios.html'
+    return render(request, 'operarios/operarios.html', context)
 
-# NUEVA VISTA: Crear Operario (Solo para Jefe de Bodega)
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['jefe_bodega']) # <-- SOLO Jefe de Bodega
+# --- VISTA: Crear Operario ---
+
+@login_required
 def operario_create(request):
-    """ Permite al Jefe de Bodega crear un nuevo Operario. """
+    """ Permite la creación de un nuevo operario. SOLO para Jefe de Bodega (RBAC). """
     
-    form = OperarioForm()
+    role = getRole(request)
 
-    if request.method == 'POST':
-        form = OperarioForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # Redirige a la lista de operarios después de la creación exitosa
-            return redirect('operario_list') 
-    
-    context = {
-        'form': form,
-        'titulo': "Crear Nuevo Operario"
-    }
-    
-    # Renderiza la nueva plantilla 'Operario/operarioCreate.html'
-    return render(request, 'Operario/operarioCreate.html', context)
+    # 🔑 Chequeo de Autorización (RBAC)
+    if role == "Jefe de Bodega":
+        if request.method == 'POST':
+            form = OperarioForm(request.POST)
+            if form.is_valid():
+                form.save()
+                # La función messages.success ahora funciona correctamente
+                messages.success(request, 'Operario creado exitosamente') 
+                return redirect('operario_list')
+            
+        else:
+            form = OperarioForm()
+
+        context = {
+            'form': form,
+        }
+        # 🎯 VERIFICADO: El template usa la ruta corregida en minúsculas
+        return render(request, 'operarios/operarioCreate.html', context)
+        
+    else:
+        # 🛑 Respuesta de Denegación de Acceso
+        return HttpResponse("Unauthorized User: Solo el Jefe de Bodega puede crear operarios", status=403)

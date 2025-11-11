@@ -11,4 +11,6 @@ urlpatterns = [
     
     # Crear Pedido (Protegida)
     path('crear/', csrf_exempt(views.pedido_create), name='pedido_create'), 
+
+    path('asignar/<int:pedido_id>/', views.pedido_assign, name='pedido_assign'),
 ]

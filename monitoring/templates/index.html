@@ -1,8 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
 
-    <div style=" display: flex; align-items: center; justify-content: center;" class="login-box auth0-box before">
-            <img style="width:80%; " src="/static/media/monitor.png" />
+<div class="p-5 mb-5 bg-light rounded-3 shadow-sm text-center">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold text-dark">Sistema de Gestión de Bodegas Provesi 📦</h1>
+        <p class="col-md-8 offset-md-2 fs-5 text-muted mt-4">
+            Plataforma centralizada para la administración segura y eficiente.
+        </p>
+        
+        {% if not user.is_authenticated %}
+        <a class="btn btn-primary btn-lg mt-3" href="{% url 'login' %}" role="button">
+            Iniciar Sesión
+        </a>
+        {% else %}
+        <a class="btn btn-success btn-lg mt-3" href="{% url 'pedido_list' %}" role="button">
+            Ir a Gestión de Pedidos
+        </a>
+        {% endif %}
     </div>
+</div>
+
+<h2 class="text-center mb-4">Experimento seguridad</h2>
+
+    
+
+    
+
 
 {% endblock %}

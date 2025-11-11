@@ -35,8 +35,16 @@ def pedido_list(request):
     # Chequeo de Autorización (RBAC)
     if role == "Jefe de Bodega":
         
-        pedidos = get_pedidos()
-        operarios_disponibles = Operario.objects.filter(disponible=True)
+        # Nota: La base de datos sigue sin tener las tablas de Operario y Pedido, 
+        # pero esto solo afecta el contenido, no el cargador de templates.
+        try:
+            pedidos = get_pedidos()
+            operarios_disponibles = Operario.objects.filter(disponible=True)
+        except Exception as e:
+            # Si hay un error de DB (como la tabla no existe), renderiza un error amigable.
+            if "no such table" in str(e):
+                return HttpResponse(f"Error de Base de Datos: Las tablas de Pedidos y Operarios no existen. Ejecuta 'python manage.py migrate'. Detalles: {e}", status=500)
+            raise e
 
         context = {
             'pedido_list': pedidos,
@@ -44,7 +52,8 @@ def pedido_list(request):
             'role': role
         }
         
-        return render(request, 'Pedido/pedidos.html', context)
+        # 🎯 CORRECCIÓN APLICADA AQUÍ: Cambiado 'Pedido/pedidos.html' a 'pedidos/pedidos.html'
+        return render(request, 'pedidos/pedidos.html', context)
     
     else:
         # Denegación de Acceso: Confidencialidad Asegurada
@@ -54,7 +63,12 @@ def pedido_list(request):
 @login_required
 def single_pedido(request, id=0):
     """ Muestra el detalle de un pedido. """
-    # Nota: Si el Jefe de Bodega tiene el único rol con acceso, se mantiene el filtro de visibilidad.
+    role = getRole(request)
+    
+    if role != "Jefe de Bodega":
+        # Denegación de Acceso: Si Operario intenta acceder al detalle
+        return HttpResponse("Unauthorized User: Solo el Jefe de Bodega puede ver el detalle de pedidos", status=403)
+
     try:
         pedido = get_pedido(id)
     except Exception:
@@ -63,7 +77,9 @@ def single_pedido(request, id=0):
     context = {
         'pedido': pedido
     }
-    return render(request, 'Pedido/pedido.html', context)
+    
+    # 🎯 CORRECCIÓN APLICADA AQUÍ: Cambiado 'Pedido/pedido.html' a 'pedidos/pedido.html'
+    return render(request, 'pedidos/pedido.html', context)
 
 
 @login_required
@@ -77,7 +93,7 @@ def pedido_create(request):
             if form.is_valid():
                 create_pedido(form)
                 messages.add_message(request, messages.SUCCESS, 'Pedido creado exitosamente')
-                # 🔄 CAMBIO: Redirige a la lista de pedidos después de guardar.
+                # Redirige a la lista de pedidos después de guardar.
                 return HttpResponseRedirect(reverse('pedido_list')) 
             else:
                 print(form.errors)
@@ -87,7 +103,45 @@ def pedido_create(request):
         context = {
             'form': form,
         }
-        return render(request, 'Pedido/pedidoCreate.html', context)
+        
+        # 🎯 CORRECCIÓN APLICADA AQUÍ: Cambiado 'Pedido/pedidoCreate.html' a 'pedidos/pedidoCreate.html'
+        return render(request, 'pedidos/pedidoCreate.html', context)
         
     else:
         return HttpResponse("Unauthorized User: Solo el Jefe de Bodega puede crear pedidos", status=403)
+    
+
+# pedidos/views.py
+
+@login_required
+def pedido_assign(request, pedido_id):
+    role = getRole(request)
+    
+    if role != "Jefe de Bodega":
+        return HttpResponse("Acceso denegado.", status=403)
+
+    if request.method == 'POST':
+        pedido = get_object_or_404(Pedido, pk=pedido_id)
+        operario_id = request.POST.get('operario_id')
+
+        if operario_id:
+            try:
+                operario = Operario.objects.get(pk=operario_id, disponible=True)
+                
+                # 1. Asignar el pedido al operario
+                pedido.operario_asignado = operario
+                pedido.estado = 'ASIGNADO' # O el estado que corresponda
+                pedido.save()
+
+                # 2. Marcar al operario como NO disponible (opcional, según tu lógica)
+                operario.disponible = False
+                operario.save()
+
+                messages.success(request, f'Pedido {pedido_id} asignado a {operario.nombre}.')
+            except Operario.DoesNotExist:
+                messages.error(request, 'El operario no existe o ya no está disponible.')
+            
+        return redirect('pedido_list')
+    
+    return HttpResponse("Método no permitido.", status=405)
+    
