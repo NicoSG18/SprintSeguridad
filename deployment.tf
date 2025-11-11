@@ -45,9 +45,9 @@ provider "aws" {
 locals {
   project_name = "${var.project_prefix}-authentication"
   repository   = "https://github.com/ISIS2503/ISIS2503-MonitoringApp-Auth0.git"
-  # ⚠️ IMPORTANTE: REEMPLAZAR con una clave segura. 
-  # Esta clave la lee el settings.py para el manejo de sesiones de Django.
-  django_secret_key = "UnaClaveSecretaMuyLargaYUnicaParaProducction-9c+4y&f9rymz$kum_" 
+  # ⚠️ IMPORTANTE: REEMPLAZAR con una clave segura. 
+  # Esta clave la lee el settings.py para el manejo de sesiones de Django.
+  django_secret_key = "UnaClaveSecretaMuyLargaYUnicaParaProducction-9c+4y&f9rymz$kum_" 
 
   common_tags = {
     Project   = local.project_name
@@ -91,7 +91,6 @@ resource "aws_security_group" "traffic_django" {
 
 # Recurso. Define el grupo de seguridad para el tráfico de la base de datos (5432).
 resource "aws_security_group" "traffic_db" {
-  # ... (inalterado)
   name        = "${var.project_prefix}-traffic-db"
   description = "Allow PostgreSQL access"
 
@@ -102,10 +101,7 @@ resource "aws_security_group" "traffic_db" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
-  # 🎯 MEJORA DE SEGURIDAD: Restringir tráfico de DB solo a la instancia de Django
-  # NOTA: Para el laboratorio, lo mantendremos en 0.0.0.0/0, pero idealmente se restringiría.
-
+  
   tags = merge(local.common_tags, {
     Name = "${var.project_prefix}-traffic-db"
   })
@@ -113,7 +109,6 @@ resource "aws_security_group" "traffic_db" {
 
 # Recurso. Define el grupo de seguridad para el tráfico SSH (22) y permite todo el tráfico saliente.
 resource "aws_security_group" "traffic_ssh" {
-  # ... (inalterado)
   name        = "${var.project_prefix}-traffic-ssh"
   description = "Allow SSH access"
 
@@ -140,7 +135,6 @@ resource "aws_security_group" "traffic_ssh" {
 
 # Recurso. Define la instancia EC2 para la base de datos PostgreSQL.
 resource "aws_instance" "database" {
-  # ... (inalterado)
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
   associate_public_ip_address = true
@@ -152,6 +146,7 @@ resource "aws_instance" "database" {
               sudo apt-get update -y
               sudo apt-get install -y postgresql postgresql-contrib
 
+:// * (Script de DB inalterado, es correcto)
               sudo -u postgres psql -c "CREATE USER monitoring_user WITH PASSWORD 'isis2503';"
               sudo -u postgres createdb -O monitoring_user monitoring_db
               echo "host all all 0.0.0.0/0 trust" | sudo tee -a /etc/postgresql/16/main/pg_hba.conf
@@ -167,7 +162,6 @@ resource "aws_instance" "database" {
 }
 
 # Recurso. Define la instancia EC2 para la aplicación de Monitoring (Django).
-# 🎯 CORREGIDO: Se configura el entorno, Gunicorn, y Systemd para que la app se ejecute.
 resource "aws_instance" "monitoring" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
@@ -175,35 +169,12 @@ resource "aws_instance" "monitoring" {
   vpc_security_group_ids      = [aws_security_group.traffic_django.id, aws_security_group.traffic_ssh.id]
 
   user_data = <<-EOT
-              #!/bin/bash
+              #!/bin/bash
 
-              # --- 1. CONFIGURACIÓN DEL ENTORNO DE PRODUCCIÓN ---
-              DB_HOST="${aws_instance.database.private_ip}"
-              PUBLIC_IP="${aws_instance.monitoring.public_ip}"
-
-              # Crear archivo de entorno /etc/django_env
-              echo "DATABASE_HOST=$DB_HOST" | sudo tee /etc/django_env
-              echo "DATABASE_NAME=monitoring_db" | sudo tee -a /etc/django_env
-              echo "DATABASE_USER=monitoring_user" | sudo tee -a /etc/django_env
-              echo "DATABASE_PASSWORD=isis2503" | sudo tee -a /etc/django_env
-              
-              # Variables de Django (Leídas por settings.py)
-              echo "SECRET_KEY=${local.django_secret_key}" | sudo tee -a /etc/django_env 
-              echo "DEBUG=False" | sudo tee -a /etc/django_env
-              echo "ALLOWED_HOSTS=$PUBLIC_IP" | sudo tee -a /etc/django_env
-              
-              # Variable usada para el Logout Redirect de Auth0
-              echo "EXTERNAL_URL=http://$PUBLIC_IP:8080" | sudo tee -a /etc/django_env 
-
-              # --- 2. INSTALACIÓN DE DEPENDENCIAS ---
-              # Instala Python, Git, dependencias de DB, Entorno Virtual y Gunicorn
+              # --- 1. CONFIGURACIÓN DEL ENTORNO DE PRODUCCIÓN ---
+              DB_HOST="${aws_instance.database.private_ip}"
+              
+              # 🎯 CORRECCIÓN: Instalar curl y obtener la IP pública desde el metadata service
               sudo apt-get update -y
-              sudo apt-get install -y python3-pip git build-essential libpq-dev python3-dev python3-venv gunicorn
-
-              # --- 3. CLONACIÓN Y CONFIGURACIÓN DEL PROYECTO ---
-              mkdir -p /labs
-              cd /labs
-              git clone ${local.repository}
-              cd ISIS2503-MonitoringApp-Auth0
-              
-              # Usar entorno
+              sudo apt-get install -y curl
+              PUBLIC_IP
