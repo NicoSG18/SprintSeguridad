@@ -1,19 +1,4 @@
-# ***************** Universidad de los Andes ***********************
-# ****** Departamento de Ingeniería de Sistemas y Computación ******
-# ********** Arquitectura y diseño de Software - ISIS2503 **********
-#
-# Infraestructura para laboratorio de Autenticación y Autorización
-#
-# Elementos a desplegar en AWS:
-# 1. Grupos de seguridad:
-#    - authd-traffic-django (puerto 8080)
-#    - authd-traffic-db (puerto 5432)
-#    - authd-traffic-ssh (puerto 22)
-#
-# 2. Instancias EC2:
-#    - authd-db (PostgreSQL instalado y configurado)
-#    - authd-django (Monitoring app instalada y migraciones aplicadas)
-# ******************************************************************
+
 
 # Variable. Define la región de AWS donde se desplegará la infraestructura.
 variable "region" {
