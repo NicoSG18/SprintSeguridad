@@ -1,4 +1,4 @@
-from django.contrib import messages  # ⬅️ CORREGIDO: Importación correcta de messages
+from django.contrib import messages  
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -9,7 +9,6 @@ from monitoring.auth0backend import getRole
 # Modelos y Formularios
 from operarios.forms import OperarioForm
 from .models import Operario 
-# from .decorators import allowed_users # Se deja comentado si no se usa
 
 # --- VISTA: Lista de Operarios ---
 
@@ -17,7 +16,6 @@ from .models import Operario
 def operario_list(request):
     """ Muestra la lista de operarios activos. Accesible por cualquier usuario autenticado. """
     
-    # Lógica de negocio segura (usando ORM)
     operarios = Operario.objects.all().order_by('disponible', 'nombre')
 
     context = {
@@ -25,7 +23,6 @@ def operario_list(request):
         'titulo': "Personal Activo de Bodega"
     }
     
-    # 🎯 CORREGIDO: Cambiado 'Operario/operarios.html' a 'operarios/operarios.html'
     return render(request, 'operarios/operarios.html', context)
 
 # --- VISTA: Crear Operario ---
@@ -52,9 +49,7 @@ def operario_create(request):
         context = {
             'form': form,
         }
-        # 🎯 VERIFICADO: El template usa la ruta corregida en minúsculas
         return render(request, 'operarios/operarioCreate.html', context)
         
     else:
-        # 🛑 Respuesta de Denegación de Acceso
         return HttpResponse("Unauthorized User: Solo el Jefe de Bodega puede crear operarios", status=403)

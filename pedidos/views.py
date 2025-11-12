@@ -128,12 +128,10 @@ def pedido_assign(request, pedido_id):
             try:
                 operario = Operario.objects.get(pk=operario_id, disponible=True)
                 
-                # 1. Asignar el pedido al operario
                 pedido.operario_asignado = operario
                 pedido.estado = 'ASIGNADO' # O el estado que corresponda
                 pedido.save()
 
-                # 2. Marcar al operario como NO disponible (opcional, según tu lógica)
                 operario.disponible = False
                 operario.save()
 
